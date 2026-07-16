@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <winsock2.h>
 
+// gcc -shared -o ac_telemetry.dll ac_telemetry.c -lws2_32
+
 #define EXPORT __declspec(dllexport)
 
 struct Handshake {
