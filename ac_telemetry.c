@@ -1,10 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <winsock2.h>
-
-// gcc -shared -o ac_telemetry.dll ac_telemetry.c -lws2_32
+#include <windows.h>
 
 #define EXPORT __declspec(dllexport)
+
+SOCKET s;
 
 struct Handshake {
     int identifier;
@@ -12,7 +13,6 @@ struct Handshake {
     int operationId;
 };
 
-// Mantenemos la estructura pequeña, solo nos interesa leer el principio de la memoria
 struct CarTelemetry {
     int identifier;
     int size;
@@ -23,51 +23,53 @@ struct CarTelemetry {
 
 EXPORT void init_telemetry() {
     WSADATA wsa;
-    SOCKET s;
     struct sockaddr_in server;
     
-    printf("[C-CORE] Starting network system...\n");
-    if (WSAStartup(MAKEWORD(2,2), &wsa) != 0) return;
+    WSAStartup(MAKEWORD(2,2), &wsa);
+    s = socket(AF_INET, SOCK_DGRAM, 0);
     
-    if((s = socket(AF_INET, SOCK_DGRAM, 0)) == INVALID_SOCKET) return;
+    // --- NUEVO: Hacer el socket NO bloqueante ---
+    u_long mode = 1;
+    ioctlsocket(s, FIONBIO, &mode);
+    // -------------------------------------------
     
     server.sin_family = AF_INET;
     server.sin_addr.s_addr = inet_addr("127.0.0.1");
     server.sin_port = htons(9996);
     
-    // CAMBIO 1: operationId = 1 (Start UDP Telemetry Stream)
-    struct Handshake hs = {1, 1, 1};
-    
-    printf("[C-CORE] Sending Handshake (UPDATE) to Assetto Corsa...\n");
+    struct Handshake hs = {1, 1, 1}; 
     sendto(s, (char*)&hs, sizeof(hs), 0, (struct sockaddr*)&server, sizeof(server));
-    
-    // CAMBIO 2: Un buffer gigante para que quepa todo el paquete del juego
+}
+
+// Cambiamos a int para devolver el estado a Python
+EXPORT int update_telemetry(struct CarTelemetry* out_data) {
     char buffer[1024];
+    struct sockaddr_in server;
     int slen = sizeof(server);
-    printf("[C-CORE] Listening for telemetry data...\n");
     
-    // CAMBIO 3: Bucle para ignorar el falso error 10054 de Windows
-    while (1) {
-        int recv_len = recvfrom(s, buffer, sizeof(buffer), 0, (struct sockaddr*)&server, &slen);
-        
-        if (recv_len == SOCKET_ERROR) {
-            int err = WSAGetLastError();
-            if (err == 10054) {
-                // Windows UDP quirk. Lo ignoramos y volvemos a escuchar al instante.
-                continue; 
-            }
-            printf("[C-CORE] recvfrom() failed. Error: %d\n", err);
-            break;
+    int recv_len = recvfrom(s, buffer, sizeof(buffer), 0, (struct sockaddr*)&server, &slen);
+    
+    if (recv_len == SOCKET_ERROR) {
+        int err = WSAGetLastError();
+        // WSAEWOULDBLOCK (10035) significa "No hay datos en este exacto milisegundo"
+        if (err == WSAEWOULDBLOCK || err == 10054) {
+            return 0; // Devolvemos el control a Python sin datos
         }
-        
-        // Si hay datos, encajamos la memoria bruta (buffer) en nuestro struct
-        struct CarTelemetry* data = (struct CarTelemetry*)buffer;
-        
-        printf("[C-CORE] SUCCESS! Packet received (%d bytes).\n", recv_len);
-        printf("[C-CORE] Speed: %.2f km/h\n", data->speed_kmh);
-        break; // Rompemos el bucle porque ya hemos leído el primer paquete con éxito
+        return -1; // Error real
     }
     
+    struct CarTelemetry* incoming = (struct CarTelemetry*)buffer;
+    
+    out_data->identifier = incoming->identifier;
+    out_data->size = incoming->size;
+    out_data->speed_kmh = incoming->speed_kmh;
+    out_data->speed_mph = incoming->speed_mph;
+    out_data->speed_ms = incoming->speed_ms;
+    
+    return 1; // Éxito, hay datos nuevos
+}
+
+EXPORT void close_telemetry() {
     closesocket(s);
     WSACleanup();
 }
