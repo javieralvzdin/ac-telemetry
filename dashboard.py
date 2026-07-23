@@ -43,7 +43,7 @@ bucket = "assetto_corsa"
 client = influxdb_client.InfluxDBClient(url=url, token=token, org=org)
 # Configuramos el empaquetado: 60 datos por envío (1 segundo de telemetría a 60Hz)
 write_api = client.write_api(write_options=WriteOptions(batch_size=60, flush_interval=1000))
-
+# REVISAR POR AQUI 
 # === INICIO C DLL ===
 dll_path = os.path.abspath("ac_telemetry.dll")
 ac_lib = ctypes.CDLL(dll_path)
