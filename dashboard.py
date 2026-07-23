@@ -36,7 +36,7 @@ class CarTelemetry(ctypes.Structure):
 
 # === CONFIGURACIÓN INFLUXDB ===
 url = "http://localhost:8086"
-token = "3TcYCntssTwY3BXCEzKv8A82DuHwnKdZd_jD_flOmUtjxekL3RmjF_jAgbm3C33s_cw1P1Qcy-M5AZtuD2p_7Q=="  # <--- CAMBIA ESTO
+token = "3TcYCntssTwY3BXCEzKv8A82DuHwnKdZd_jD_flOmUtjxekL3RmjF_jAgbm3C33s_cw1P1Qcy-M5AZtuD2p_7Q=="  
 org = "motorsport"
 bucket = "assetto_corsa"
 
