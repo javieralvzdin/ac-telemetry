@@ -71,13 +71,14 @@ try:
             gas_pct = data.gas * 100
             brake_pct = data.brake * 100
             
-            # 1. Mostramos por pantalla (como antes)
+            # 1. Mostramos por pantalla (Añadido Steer)
             dashboard = (
                 f"\rGear: {data.gear - 1:2d} | "
                 f"RPM: {data.engineRPM:5.0f} | "
                 f"Speed: {data.speed_kmh:5.1f} km/h | "
                 f"Gas: {gas_pct:3.0f}% | "
-                f"Brake: {brake_pct:3.0f}% "
+                f"Brake: {brake_pct:3.0f}% | "
+                f"Steer: {data.steer:5.2f} "
             )
             print(dashboard, end="", flush=True)
             
@@ -90,7 +91,7 @@ try:
                 .field("speed_kmh", float(data.speed_kmh))
                 .field("gas_pct", float(gas_pct))
                 .field("brake_pct", float(brake_pct))
-                .field("steer", float(data.steer))
+                .field("steer_angle", float(data.steer)) # <-- Nombre corregido para Grafana
                 .field("g_vertical", float(data.accG_vertical))
                 .field("g_horizontal", float(data.accG_horizontal))
                 .field("g_frontal", float(data.accG_frontal))
