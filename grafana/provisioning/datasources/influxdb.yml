@@ -1,0 +1,14 @@
+apiVersion: 1
+
+datasources:
+  - name: InfluxDB
+    type: influxdb
+    access: proxy
+    url: http://influxdb:8086
+    jsonData:
+      version: Flux
+      organization: motorsport
+      defaultBucket: assetto_corsa
+    secureJsonData:
+      token: 3TcYCntssTwY3BXCEzKv8A82DuHwnKdZd_jD_flOmUtjxekL3RmjF_jAgbm3C33s_cw1P1Qcy-M5AZtuD2p_7Q==
+    isDefault: true
