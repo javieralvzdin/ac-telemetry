@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h> // Necesario para memcpy
+#include <string.h> 
 #include <winsock2.h>
 #include <windows.h>
 
@@ -14,7 +14,7 @@ struct Handshake {
     int operationId;
 };
 
-// Forzamos alineación de 1 byte para leer el paquete de red exactamente como llega
+// FORZANDO ALINEACION DE 1 BYTE PARA LEER EL PAQUETE DE RED TAL CUAL LLEGA
 #pragma pack(push, 1) 
 struct CarTelemetry {
     int identifier;
@@ -28,7 +28,7 @@ struct CarTelemetry {
     char isTcEnabled;
     char inPit;
     char engineLimiterOn;
-    char padding[2]; // Padding para alinear los siguientes floats
+    char padding[2]; // PARA ALINEAR LOS FLOATS
     float accG_vertical;
     float accG_horizontal;
     float accG_frontal;
@@ -73,15 +73,15 @@ EXPORT int update_telemetry(struct CarTelemetry* out_data) {
     if (recv_len == SOCKET_ERROR) {
         int err = WSAGetLastError();
         if (err == WSAEWOULDBLOCK || err == 10054) {
-            return 0; // Sin datos nuevos
+            return 0; // EN CASO DE NO HABER DATOS NUEVOS
         }
-        return -1; // Error real
+        return -1; 
     }
     
-    // Volcamos la memoria de red directamente en nuestro struct (Copia súper rápida)
+    // VOLCAMOS LA MEMORIA DE RED A NUESTRO STRUCT
     memcpy(out_data, buffer, sizeof(struct CarTelemetry));
     
-    return 1; // Éxito
+    return 1;
 }
 
 EXPORT void close_telemetry() {

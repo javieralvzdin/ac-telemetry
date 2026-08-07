@@ -41,7 +41,7 @@ org = "motorsport"
 bucket = "assetto_corsa"
 
 client = influxdb_client.InfluxDBClient(url=url, token=token, org=org)
-# Configuramos el empaquetado: 60 datos por envío (1 segundo de telemetría a 60Hz)
+# EMPAQUETAMOS 60 DATOS POR ENVIO (1s A 60Hz)
 write_api = client.write_api(write_options=WriteOptions(batch_size=60, flush_interval=1000))
 # REVISAR POR AQUI 
 # === INICIO C DLL ===
@@ -71,7 +71,7 @@ try:
             gas_pct = data.gas * 100
             brake_pct = data.brake * 100
             
-            # 1. Mostramos por pantalla (Añadido Steer)
+            # 1. SACAMOS POR PANTALLA LOS DATOS
             dashboard = (
                 f"\rGear: {data.gear - 1:2d} | "
                 f"RPM: {data.engineRPM:5.0f} | "
@@ -82,7 +82,7 @@ try:
             )
             print(dashboard, end="", flush=True)
             
-            # 2. Creamos el punto de datos para la base de datos
+            # 2. COMUNICACIÓN CON LA BASE DE DATOS
             point = (
                 influxdb_client.Point("vehicle_dynamics")
                 .tag("session", "live")
@@ -91,20 +91,20 @@ try:
                 .field("speed_kmh", float(data.speed_kmh))
                 .field("gas_pct", float(gas_pct))
                 .field("brake_pct", float(brake_pct))
-                .field("steer_angle", float(data.steer)) # <-- Nombre corregido para Grafana
+                .field("steer_angle", float(data.steer)) # NOMBRE CAMBIADO POR PROBLEMAS CON GRAFANA
                 .field("g_vertical", float(data.accG_vertical))
                 .field("g_horizontal", float(data.accG_horizontal))
                 .field("g_frontal", float(data.accG_frontal))
             )
             
-            # 3. Lo metemos en el buffer de envío
+            # 3. DATOS AL BUFFER DE ENVIO
             write_api.write(bucket=bucket, org=org, record=point)
         
         time.sleep(0.01)
         
 except KeyboardInterrupt:
     print("\n\n[PYTHON] Flushing remaining data to DB...")
-    write_api.flush() # Vaciamos lo que quede en la RAM
+    write_api.flush() # VACIAMOS LO QUE QUEDA EN LA RAM
     write_api.close()
     client.close()
     ac_lib.close_telemetry()
