@@ -24,7 +24,7 @@ struct CarTelemetry {
     float speed_ms;
     char isAbsEnabled;
     char isAbsInAction;
-    char isTcInAction;
+    char isTcInAction;  // CONTROL DE TRACCION SOLO EN LIBRE
     char isTcEnabled;
     char inPit;
     char engineLimiterOn;
