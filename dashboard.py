@@ -76,8 +76,8 @@ try:
                 f"\rGear: {data.gear - 1:2d} | "
                 f"RPM: {data.engineRPM:5.0f} | "
                 f"Speed: {data.speed_kmh:5.1f} km/h | "
-                f"Gas: {gas_pct:3.0f}% | "
-                f"Brake: {brake_pct:3.0f}% | "
+                f"Gas(%): {gas_pct:3.0f}% | "
+                f"Brake(%): {brake_pct:3.0f}% | "
                 f"Steer: {data.steer:5.2f} "
             )
             print(dashboard, end="", flush=True)
