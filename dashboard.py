@@ -3,7 +3,7 @@ import os
 import time
 import influxdb_client
 from influxdb_client.client.write_api import WriteOptions
-
+# REVISAR ERRORES DE CARGA RAPIDA DE DATOS
 class CarTelemetry(ctypes.Structure):
     _pack_ = 1
     _fields_ = [
