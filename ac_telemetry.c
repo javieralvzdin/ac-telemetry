@@ -43,7 +43,25 @@ struct CarTelemetry {
     float steer;     // -1.0 a 1.0
     int gear;        // -1 (R), 0 (N), 1, 2, 3...
 };
+
+// Respuesta al Handshake (operationId=1): la envia Assetto Corsa una vez al
+// suscribirse, con el nombre del coche y del circuito de la sesion activa.
+// NOTA: layout tomado del protocolo UDP conocido de Assetto Corsa (wchar_t[100]
+// = UTF-16 en Windows); no se ha podido verificar byte a byte contra el juego
+// real desde este entorno, revisar si carName/trackName llegan vacios o con
+// texto corrupto.
+struct HandshakerResponse {
+    wchar_t carName[100];
+    wchar_t driverName[100];
+    int identifier;
+    int version;
+    wchar_t trackName[100];
+    wchar_t trackConfig[100];
+};
 #pragma pack(pop)
+
+static struct HandshakerResponse g_session_info;
+static int g_has_session_info = 0;
 
 // Devuelve 1 si el socket quedo listo y el handshake se envio correctamente, 0 en caso de error.
 // No confirma que Assetto Corsa haya recibido/respondido el handshake (UDP), solo que el envio local no fallo.
@@ -99,17 +117,41 @@ EXPORT int update_telemetry(struct CarTelemetry* out_data) {
         return -1;
     }
 
-    // DESCARTAMOS PAQUETES QUE NO TENGAN EXACTAMENTE EL TAMANO DE CarTelemetry:
-    // evita volcar bytes sin inicializar de `buffer` si llega un paquete mas
-    // pequeno (p.ej. otro tipo de mensaje del protocolo UDP) y de paso filtra
-    // paquetes de un tipo distinto al esperado.
-    if (recv_len != (int)sizeof(struct CarTelemetry)) {
+    // Paquete de respuesta al handshake (nombre de coche/circuito): se distingue
+    // por tener exactamente el tamano de HandshakerResponse. Lo guardamos aparte
+    // y NO lo tratamos como telemetria de coche.
+    if (recv_len == (int)sizeof(struct HandshakerResponse)) {
+        memcpy(&g_session_info, buffer, sizeof(struct HandshakerResponse));
+        g_has_session_info = 1;
+        return 0;
+    }
+
+    // DESCARTAMOS SOLO PAQUETES MAS PEQUENOS QUE CarTelemetry: evita volcar bytes
+    // sin inicializar de `buffer` si llega un paquete truncado. El paquete real
+    // de Assetto Corsa (RTCarInfo) trae mas campos despues de "gear" (datos de
+    // neumaticos, etc.) que este struct no modela a proposito: es mas grande que
+    // sizeof(CarTelemetry) y eso es normal, solo nos quedamos con el prefijo.
+    if (recv_len < (int)sizeof(struct CarTelemetry)) {
         return 0;
     }
 
     // VOLCAMOS LA MEMORIA DE RED A NUESTRO STRUCT
     memcpy(out_data, buffer, sizeof(struct CarTelemetry));
 
+    return 1;
+}
+
+// Copia el nombre de coche/circuito de la ultima respuesta de handshake recibida
+// a buffers de al menos 100 wchar_t cada uno. Devuelve 1 si hay datos disponibles,
+// 0 si Assetto Corsa todavia no ha respondido al handshake.
+EXPORT int get_session_info(wchar_t* car_out, wchar_t* track_out) {
+    if (!g_has_session_info) {
+        return 0;
+    }
+    memcpy(car_out, g_session_info.carName, sizeof(g_session_info.carName));
+    memcpy(track_out, g_session_info.trackName, sizeof(g_session_info.trackName));
+    car_out[99] = L'\0';
+    track_out[99] = L'\0';
     return 1;
 }
 
