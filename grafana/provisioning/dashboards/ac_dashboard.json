@@ -75,7 +75,7 @@
       "targets": [
         {
           "datasource": { "type": "influxdb", "uid": "influxdb" },
-          "query": "from(bucket: \"assetto_corsa\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"vehicle_dynamics\")\n  |> filter(fn: (r) => r[\"_field\"] == \"speed_kmh\" or r[\"_field\"] == \"gas_pct\" or r[\"_field\"] == \"brake_pct\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)",
+          "query": "from(bucket: \"assetto_corsa\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"vehicle_dynamics\")\n  |> filter(fn: (r) => r[\"_field\"] == \"speed_kmh\" or r[\"_field\"] == \"gas_pct\" or r[\"_field\"] == \"brake_pct\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> drop(columns: [\"session\"])",
           "refId": "A"
         }
       ],
@@ -92,11 +92,18 @@
             "axisColorMode": "text",
             "axisLabel": "",
             "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "bars",
             "fillOpacity": 100,
-            "gradientMode": "hue",
+            "gradientMode": "none",
             "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "lineInterpolation": "linear",
             "lineWidth": 1,
+            "pointSize": 5,
             "scaleDistribution": { "type": "linear" },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": { "group": "A", "mode": "none" },
             "thresholdsStyle": { "mode": "off" }
           },
           "mappings": [],
@@ -107,20 +114,18 @@
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
       "id": 2,
       "options": {
-        "barRadius": 0, "barWidth": 0.9, "fullHighlight": false, "groupWidth": 0.8,
         "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true },
-        "orientation": "auto", "showValue": "auto", "stacking": "none",
-        "tooltip": { "mode": "single", "sort": "none" }, "xField": "time"
+        "tooltip": { "mode": "single", "sort": "none" }
       },
       "targets": [
         {
           "datasource": { "type": "influxdb", "uid": "influxdb" },
-          "query": "from(bucket: \"assetto_corsa\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"vehicle_dynamics\")\n  |> filter(fn: (r) => r[\"_field\"] == \"steer_angle\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)",
+          "query": "from(bucket: \"assetto_corsa\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"vehicle_dynamics\")\n  |> filter(fn: (r) => r[\"_field\"] == \"steer_angle\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> drop(columns: [\"session\"])",
           "refId": "A"
         }
       ],
       "title": "Ángulo de Volante",
-      "type": "barchart"
+      "type": "timeseries"
     },
     {
       "datasource": { "type": "influxdb", "uid": "influxdb" },
@@ -183,12 +188,12 @@
       "targets": [
         {
           "datasource": { "type": "influxdb", "uid": "influxdb" },
-          "query": "from(bucket: \"assetto_corsa\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"vehicle_dynamics\")\n  |> filter(fn: (r) => r[\"_field\"] == \"rpm\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)",
+          "query": "from(bucket: \"assetto_corsa\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"vehicle_dynamics\")\n  |> filter(fn: (r) => r[\"_field\"] == \"rpm\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> drop(columns: [\"session\"])",
           "refId": "A"
         },
         {
           "datasource": { "type": "influxdb", "uid": "influxdb" },
-          "query": "from(bucket: \"assetto_corsa\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"vehicle_dynamics\")\n  |> filter(fn: (r) => r[\"_field\"] == \"gear\")\n  |> aggregateWindow(every: v.windowPeriod, fn: last, createEmpty: false)",
+          "query": "from(bucket: \"assetto_corsa\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"vehicle_dynamics\")\n  |> filter(fn: (r) => r[\"_field\"] == \"gear\")\n  |> aggregateWindow(every: v.windowPeriod, fn: last, createEmpty: false)\n  |> drop(columns: [\"session\"])",
           "refId": "B"
         }
       ],
