@@ -1,9 +1,28 @@
 import ctypes
+import logging
 import os
+import sys
 import time
+import uuid
+
 import influxdb_client
 from influxdb_client.client.write_api import WriteOptions
-# REVISAR ERRORES DE CARGA RAPIDA DE DATOS
+from influxdb_client.client.write.point import WritePrecision
+
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass  # dotenv es opcional; si no esta instalado, se usan variables de entorno del sistema.
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="[%(asctime)s] %(levelname)s: %(message)s",
+    datefmt="%H:%M:%S",
+)
+log = logging.getLogger("ac_telemetry")
+
+
 class CarTelemetry(ctypes.Structure):
     _pack_ = 1
     _fields_ = [
@@ -34,46 +53,91 @@ class CarTelemetry(ctypes.Structure):
         ("gear", ctypes.c_int),
     ]
 
-# === CONFIGURACIÓN INFLUXDB ===
-url = "http://localhost:8086"
-token = "3TcYCntssTwY3BXCEzKv8A82DuHwnKdZd_jD_flOmUtjxekL3RmjF_jAgbm3C33s_cw1P1Qcy-M5AZtuD2p_7Q=="  
-org = "motorsport"
-bucket = "assetto_corsa"
+
+# === CONFIGURACION INFLUXDB (via variables de entorno / .env, nunca hardcodeadas) ===
+url = os.environ.get("INFLUXDB_URL", "http://localhost:8086")
+token = os.environ.get("INFLUXDB_TOKEN")
+org = os.environ.get("INFLUXDB_ORG")
+bucket = os.environ.get("INFLUXDB_BUCKET")
+
+if not token or not org or not bucket:
+    log.error(
+        "Faltan variables de entorno (INFLUXDB_TOKEN / INFLUXDB_ORG / INFLUXDB_BUCKET). "
+        "Copia .env.example a .env y rellena los valores antes de ejecutar este script."
+    )
+    sys.exit(1)
 
 client = influxdb_client.InfluxDBClient(url=url, token=token, org=org)
+
+# Callbacks para que los fallos de escritura (DB caida, red, etc.) sean visibles
+# en vez de perderse silenciosamente dentro del hilo de batching del cliente.
+def _on_write_success(conf, data):
+    pass
+
+
+def _on_write_error(conf, data, exception):
+    log.error("Fallo al escribir en InfluxDB (%s): %s", conf, exception)
+
+
+def _on_write_retry(conf, data, exception):
+    log.warning("Reintentando escritura en InfluxDB (%s): %s", conf, exception)
+
+
 # EMPAQUETAMOS 60 DATOS POR ENVIO (1s A 60Hz)
-write_api = client.write_api(write_options=WriteOptions(batch_size=60, flush_interval=1000))
-# REVISAR POR AQUI 
-# === INICIO C DLL ===
-dll_path = os.path.abspath("ac_telemetry.dll")
+write_api = client.write_api(
+    write_options=WriteOptions(batch_size=60, flush_interval=1000),
+    success_callback=_on_write_success,
+    error_callback=_on_write_error,
+    retry_callback=_on_write_retry,
+)
+
+# === INICIO C DLL (se resuelve relativo a este script, no al directorio de trabajo actual) ===
+dll_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "ac_telemetry.dll")
 ac_lib = ctypes.CDLL(dll_path)
 ac_lib.update_telemetry.argtypes = [ctypes.POINTER(CarTelemetry)]
 ac_lib.update_telemetry.restype = ctypes.c_int
-ac_lib.init_telemetry()
+ac_lib.init_telemetry.restype = ctypes.c_int
+
+if not ac_lib.init_telemetry():
+    log.error("No se pudo inicializar el socket UDP hacia Assetto Corsa (init_telemetry devolvio 0).")
+    sys.exit(1)
+
 data = CarTelemetry()
 
-os.system('cls')
+# Id de sesion: agrupa todas las muestras de esta ejecucion del script en Grafana,
+# evitando que se mezclen con las de otra sesion/dia distintos.
+session_id = time.strftime("%Y%m%d-%H%M%S") + "-" + uuid.uuid4().hex[:6]
+
+# Reconexion con backoff si el socket empieza a devolver errores reales (-1) de forma persistente.
+CONSECUTIVE_ERROR_LIMIT = 50
+RECONNECT_BACKOFF_SECONDS = 2.0
+consecutive_errors = 0
+
+os.system("cls")
 print("=== ASSETTO CORSA INFLUXDB PIPELINE ===")
+print(f"Session: {session_id}")
 print("Press Ctrl+C to stop.\n")
 
+waiting = True
+print("Waiting for Assetto Corsa connection...", end="", flush=True)
+
 try:
-    waiting = True
-    print("Waiting for Assetto Corsa connection...", end="", flush=True)
-    
     while True:
         status = ac_lib.update_telemetry(ctypes.byref(data))
-        
+
         if status == 1:
+            consecutive_errors = 0
             if waiting:
                 print("\r[OK] Connection established! Recording telemetry to InfluxDB...\n")
                 waiting = False
-                
+
             gas_pct = data.gas * 100
             brake_pct = data.brake * 100
-            
+
             # 1. SACAMOS POR PANTALLA LOS DATOS
+            # data.gear ya sigue la convencion del struct: -1=R, 0=N, 1=1a, 2=2a...
             dashboard = (
-                f"\rGear: {data.gear - 1:2d} | "
+                f"\rGear: {data.gear:2d} | "
                 f"RPM: {data.engineRPM:5.0f} | "
                 f"Speed: {data.speed_kmh:5.1f} km/h | "
                 f"Gas(%): {gas_pct:3.0f}% | "
@@ -81,31 +145,67 @@ try:
                 f"Steer: {data.steer:5.2f} "
             )
             print(dashboard, end="", flush=True)
-            
-            # 2. COMUNICACIÓN CON LA BASE DE DATOS
+
+            # 2. COMUNICACION CON LA BASE DE DATOS
             point = (
                 influxdb_client.Point("vehicle_dynamics")
-                .tag("session", "live")
-                .field("gear", data.gear - 1)
+                .tag("session", session_id)
+                .field("gear", data.gear)
                 .field("rpm", float(data.engineRPM))
                 .field("speed_kmh", float(data.speed_kmh))
                 .field("gas_pct", float(gas_pct))
                 .field("brake_pct", float(brake_pct))
-                .field("steer_angle", float(data.steer)) # NOMBRE CAMBIADO POR PROBLEMAS CON GRAFANA
+                .field("steer_angle", float(data.steer))  # NOMBRE CAMBIADO POR PROBLEMAS CON GRAFANA
                 .field("g_vertical", float(data.accG_vertical))
                 .field("g_horizontal", float(data.accG_horizontal))
                 .field("g_frontal", float(data.accG_frontal))
+                .field("lap_time_ms", int(data.lapTime))
+                .field("last_lap_ms", int(data.lastLap))
+                .field("best_lap_ms", int(data.bestLap))
+                .field("lap_count", int(data.lapCount))
+                .field("in_pit", bool(data.inPit != b"\x00"))
+                .time(time.time_ns(), WritePrecision.NS)
             )
-            
-            # 3. DATOS AL BUFFER DE ENVIO
-            write_api.write(bucket=bucket, org=org, record=point)
-        
+
+            # 3. DATOS AL BUFFER DE ENVIO (los fallos se reportan via error_callback, no se pierden en silencio)
+            try:
+                write_api.write(bucket=bucket, org=org, record=point)
+            except Exception:
+                log.exception("Excepcion sincronica al encolar el punto para InfluxDB")
+
+        elif status == -1:
+            consecutive_errors += 1
+            if consecutive_errors == 1:
+                log.warning("Error de socket leyendo telemetria (WSAGetLastError != WOULDBLOCK).")
+            if consecutive_errors >= CONSECUTIVE_ERROR_LIMIT:
+                log.warning(
+                    "Demasiados errores de socket seguidos (%d). Reintentando handshake con Assetto Corsa...",
+                    consecutive_errors,
+                )
+                ac_lib.close_telemetry()
+                time.sleep(RECONNECT_BACKOFF_SECONDS)
+                if ac_lib.init_telemetry():
+                    log.info("Handshake reenviado correctamente.")
+                else:
+                    log.error("No se pudo reabrir el socket. Se reintentara mas adelante.")
+                consecutive_errors = 0
+                waiting = True
+                print("Waiting for Assetto Corsa connection...", end="", flush=True)
+        # status == 0: sin datos nuevos todavia, no es un error.
+
         time.sleep(0.01)
-        
+
 except KeyboardInterrupt:
-    print("\n\n[PYTHON] Flushing remaining data to DB...")
-    write_api.flush() # VACIAMOS LO QUE QUEDA EN LA RAM
-    write_api.close()
-    client.close()
+    print("\n\n[PYTHON] Stopping (Ctrl+C)...")
+except Exception:
+    log.exception("Error inesperado, cerrando limpiamente")
+finally:
+    print("[PYTHON] Flushing remaining data to DB...")
+    try:
+        write_api.flush()
+        write_api.close()
+        client.close()
+    except Exception:
+        log.exception("Error cerrando el cliente de InfluxDB")
     ac_lib.close_telemetry()
     print("[PYTHON] Stream stopped cleanly.")

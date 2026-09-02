@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   influxdb:
     image: influxdb:2.7
@@ -8,11 +6,12 @@ services:
       - "8086:8086"
     environment:
       - DOCKER_INFLUXDB_INIT_MODE=setup
-      - DOCKER_INFLUXDB_INIT_USERNAME=admin
-      - DOCKER_INFLUXDB_INIT_PASSWORD=adminpassword
-      - DOCKER_INFLUXDB_INIT_ORG=motorsport
-      - DOCKER_INFLUXDB_INIT_BUCKET=assetto_corsa
-      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=3TcYCntssTwY3BXCEzKv8A82DuHwnKdZd_jD_flOmUtjxekL3RmjF_jAgbm3C33s_cw1P1Qcy-M5AZtuD2p_7Q==
+      - DOCKER_INFLUXDB_INIT_USERNAME=${INFLUXDB_ADMIN_USER}
+      - DOCKER_INFLUXDB_INIT_PASSWORD=${INFLUXDB_ADMIN_PASSWORD}
+      - DOCKER_INFLUXDB_INIT_ORG=${INFLUXDB_ORG}
+      - DOCKER_INFLUXDB_INIT_BUCKET=${INFLUXDB_BUCKET}
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=${INFLUXDB_TOKEN}
+      - DOCKER_INFLUXDB_INIT_RETENTION=${INFLUXDB_RETENTION}
     volumes:
       - influxdb_data:/var/lib/influxdb2
 
@@ -22,9 +21,16 @@ services:
     ports:
       - "3000:3000"
     environment:
+      # Acceso anonimo de solo lectura para ver el dashboard sin login.
+      # Editar el dashboard o la config requiere loguearse con las credenciales de abajo.
       - GF_AUTH_ANONYMOUS_ENABLED=true
-      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
-      - GF_AUTH_DISABLE_LOGIN_FORM=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
+      # Se inyecta para que el datasource de InfluxDB lo lea via $__env{} sin hardcodearlo en el yml.
+      - INFLUXDB_TOKEN=${INFLUXDB_TOKEN}
+      - INFLUXDB_ORG=${INFLUXDB_ORG}
+      - INFLUXDB_BUCKET=${INFLUXDB_BUCKET}
     volumes:
       - ./grafana/provisioning:/etc/grafana/provisioning
     depends_on:

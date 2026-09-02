@@ -6,7 +6,7 @@
 
 #define EXPORT __declspec(dllexport)
 
-SOCKET s;
+SOCKET s = INVALID_SOCKET;
 
 struct Handshake {
     int identifier;
@@ -45,22 +45,43 @@ struct CarTelemetry {
 };
 #pragma pack(pop)
 
-EXPORT void init_telemetry() {
+// Devuelve 1 si el socket quedo listo y el handshake se envio correctamente, 0 en caso de error.
+// No confirma que Assetto Corsa haya recibido/respondido el handshake (UDP), solo que el envio local no fallo.
+EXPORT int init_telemetry() {
     WSADATA wsa;
     struct sockaddr_in server;
-    
-    WSAStartup(MAKEWORD(2,2), &wsa);
+
+    if (WSAStartup(MAKEWORD(2,2), &wsa) != 0) {
+        return 0;
+    }
+
     s = socket(AF_INET, SOCK_DGRAM, 0);
-    
+    if (s == INVALID_SOCKET) {
+        WSACleanup();
+        return 0;
+    }
+
     u_long mode = 1;
-    ioctlsocket(s, FIONBIO, &mode);
-    
+    if (ioctlsocket(s, FIONBIO, &mode) != 0) {
+        closesocket(s);
+        s = INVALID_SOCKET;
+        WSACleanup();
+        return 0;
+    }
+
     server.sin_family = AF_INET;
     server.sin_addr.s_addr = inet_addr("127.0.0.1");
     server.sin_port = htons(9996);
-    
-    struct Handshake hs = {1, 1, 1}; 
-    sendto(s, (char*)&hs, sizeof(hs), 0, (struct sockaddr*)&server, sizeof(server));
+
+    struct Handshake hs = {1, 1, 1};
+    if (sendto(s, (char*)&hs, sizeof(hs), 0, (struct sockaddr*)&server, sizeof(server)) == SOCKET_ERROR) {
+        closesocket(s);
+        s = INVALID_SOCKET;
+        WSACleanup();
+        return 0;
+    }
+
+    return 1;
 }
 
 EXPORT int update_telemetry(struct CarTelemetry* out_data) {
@@ -69,22 +90,33 @@ EXPORT int update_telemetry(struct CarTelemetry* out_data) {
     int slen = sizeof(server);
     
     int recv_len = recvfrom(s, buffer, sizeof(buffer), 0, (struct sockaddr*)&server, &slen);
-    
+
     if (recv_len == SOCKET_ERROR) {
         int err = WSAGetLastError();
         if (err == WSAEWOULDBLOCK || err == 10054) {
             return 0; // EN CASO DE NO HABER DATOS NUEVOS
         }
-        return -1; 
+        return -1;
     }
-    
+
+    // DESCARTAMOS PAQUETES QUE NO TENGAN EXACTAMENTE EL TAMANO DE CarTelemetry:
+    // evita volcar bytes sin inicializar de `buffer` si llega un paquete mas
+    // pequeno (p.ej. otro tipo de mensaje del protocolo UDP) y de paso filtra
+    // paquetes de un tipo distinto al esperado.
+    if (recv_len != (int)sizeof(struct CarTelemetry)) {
+        return 0;
+    }
+
     // VOLCAMOS LA MEMORIA DE RED A NUESTRO STRUCT
     memcpy(out_data, buffer, sizeof(struct CarTelemetry));
-    
+
     return 1;
 }
 
 EXPORT void close_telemetry() {
-    closesocket(s);
+    if (s != INVALID_SOCKET) {
+        closesocket(s);
+        s = INVALID_SOCKET;
+    }
     WSACleanup();
 }

@@ -4,10 +4,42 @@ A real-time telemetry pipeline for Assetto Corsa. This project extracts data dir
 
 The entire database and visualization environment is containerized with Docker to be completely "Plug & Play".
 
+> ## ⭐ Quick Start (external users cloning this repo)
+>
+> Everything you need to go from `git clone` to a working dashboard on **your own PC**. This project only works locally — Assetto Corsa and this pipeline must run on the **same machine** (the C bridge talks to `127.0.0.1`, not a remote server).
+>
+> **Requirements:** Windows, Assetto Corsa, Docker Desktop, Python 3.x.
+>
+> ```
+> git clone <this-repo-url>
+> cd ac-telemetry
+>
+> # 1. Create your own secrets file (never commit .env)
+> cp .env.example .env
+> # -> open .env and set your own INFLUXDB_TOKEN / passwords (any random string works)
+>
+> # 2. Start InfluxDB + Grafana (auto-configured via the values in .env)
+> docker compose up -d
+>
+> # 3. Install Python dependencies
+> pip install -r requirements.txt
+>
+> # 4. Launch Assetto Corsa, get in a car (pits or track)
+>
+> # 5. Start the telemetry bridge
+> python dashboard.py
+> ```
+>
+> Then open **http://localhost:3000** — the dashboard is viewable immediately, no Grafana login required.
+>
+> ⚠️ `ac_telemetry.dll` is already compiled and committed in this repo — no C compiler needed to run it. It only works on Windows.
+>
+> See [Installation and Usage](#-installation-and-usage) below for the detailed walkthrough and [Troubleshooting](#-common-troubleshooting) if something doesn't show up.
+
 ## 🏗️ Project Architecture
 
 The system consists of 3 main layers:
-1. Data Acquisition (C): A compiled library (ac_telemetry.dll) that communicates via UDP sockets / shared memory to extract raw telemetry from Assetto Corsa with zero latency.
+1. Data Acquisition (C): A compiled library (ac_telemetry.dll) that communicates via Assetto Corsa's UDP telemetry protocol to extract raw telemetry from the game.
 2. Processing (Python): The dashboard.py script acts as a bridge. It uses the ctypes library to interact with the C DLL, processes variables (RPM, gears, steering wheel, etc.), and injects them into the database.
 3. Storage and Visualization (Docker): 
    - InfluxDB 2.7: Stores data in time series with high write frequency.
@@ -22,25 +54,29 @@ Before starting, make sure you have installed:
 
 ## 🚀 Installation and Usage
 
-Follow these 4 simple steps to get your telemetry running in under 2 minutes:
+Follow these 5 simple steps to get your telemetry running in under 2 minutes:
 
-### 1. Stand up the infrastructure (Database and Grafana)
+### 1. Configure your secrets
+Copy `.env.example` to `.env` and set your own values (InfluxDB token, InfluxDB/Grafana admin passwords). `.env` is git-ignored — never commit it.
+
+cp .env.example .env
+
+### 2. Stand up the infrastructure (Database and Grafana)
 Open your terminal in the project's root folder (where the docker-compose.yml file is located) and run:
 
 docker compose up -d
 
-(This will download and start InfluxDB and Grafana in the background. Thanks to the "provisioning" system, the dashboard and database connection are configured automatically).
+(This will download and start InfluxDB and Grafana in the background. Thanks to the "provisioning" system, the dashboard and database connection are configured automatically using the values from your `.env` file).
 
-### 2. Install Python dependencies
-Install the InfluxDB client for Python by running in the terminal:
+### 3. Install Python dependencies
 
-pip install influxdb-client
+pip install -r requirements.txt
 
-### 3. Hit the track!
+### 4. Hit the track!
 1. Open Assetto Corsa (or Content Manager) and enter a practice session or race.
 2. Important: You must be in the car (in the pits or on the track) for the game to start emitting telemetry.
 
-### 4. Launch the data bridge
+### 5. Launch the data bridge
 Go back to your terminal and run the main script:
 
 python dashboard.py
@@ -50,14 +86,18 @@ If everything goes well, you will see the data being sent in the console.
 ## 📈 View Data in Grafana
 
 1. Open your web browser and go to: http://localhost:3000
-2. Default username and password: admin / admin (you will be asked to change it upon first login, you can skip this).
-3. In the left menu, go to Dashboards.
-4. There you will see your telemetry dashboard ready and receiving data!
+2. The dashboard is viewable anonymously (read-only) — no login needed to just watch it.
+3. To edit the dashboard or config, log in with the `GRAFANA_ADMIN_USER` / `GRAFANA_ADMIN_PASSWORD` you set in `.env`.
+4. In the left menu, go to Dashboards.
+5. There you will see your telemetry dashboard ready and receiving data!
 
---- 
-💡 COMMON TROUBLESHOOTING:
+---
+
+## 🔧 Common Troubleshooting
 - Grafana shows "No data": Make sure the Python script is running, that you are in the car in Assetto Corsa, and that the Grafana time range (top right) is set to "Last 5 minutes" with "Auto-refresh" enabled.
 - Port already allocated error when running docker compose: If you had old InfluxDB/Grafana containers running, stop and delete them from Docker Desktop before launching the new ones.
+- `dashboard.py` exits immediately with a message about missing `INFLUXDB_TOKEN`/`INFLUXDB_ORG`/`INFLUXDB_BUCKET`: you forgot step 1 (`cp .env.example .env` and fill it in).
+- `python dashboard.py` fails to load `ac_telemetry.dll`: run it from the repo root (the script resolves the DLL next to itself) and make sure you're on Windows — the DLL only works there.
 
 ## 🛑 Shutting down the system
 When you're done playing, simply close the Python console (Ctrl+C). 
