@@ -49,7 +49,7 @@
         },
         "overrides": [
           {
-            "matcher": { "id": "byName", "options": "gas_pct live" },
+            "matcher": { "id": "byRegexp", "options": "/^gas_pct/" },
             "properties": [
               { "id": "color", "value": { "fixedColor": "dark-green", "mode": "fixed" } },
               { "id": "custom.fillOpacity", "value": 34 },
@@ -57,7 +57,7 @@
             ]
           },
           {
-            "matcher": { "id": "byName", "options": "brake_pct live" },
+            "matcher": { "id": "byRegexp", "options": "/^brake_pct/" },
             "properties": [
               { "id": "color", "value": { "fixedColor": "dark-red", "mode": "fixed" } },
               { "id": "custom.fillOpacity", "value": 39 },
@@ -151,16 +151,22 @@
         },
         "overrides": [
           {
-            "matcher": { "id": "byName", "options": "gear live" },
+            "matcher": { "id": "byRegexp", "options": "/^gear/" },
             "properties": [
               { "id": "custom.drawStyle", "value": "line" },
+              { "id": "custom.lineInterpolation", "value": "stepAfter" },
+              { "id": "custom.spanNulls", "value": true },
+              { "id": "custom.showPoints", "value": "never" },
+              { "id": "custom.fillOpacity", "value": 0 },
               { "id": "custom.axisPlacement", "value": "right" },
+              { "id": "custom.axisSoftMin", "value": -2 },
+              { "id": "custom.axisSoftMax", "value": 8 },
               { "id": "decimals", "value": 0 },
               { "id": "color", "value": { "fixedColor": "yellow", "mode": "fixed" } }
             ]
           },
           {
-            "matcher": { "id": "byName", "options": "rpm live" },
+            "matcher": { "id": "byRegexp", "options": "/^rpm/" },
             "properties": [
               { "id": "custom.fillOpacity", "value": 46 },
               { "id": "color", "value": { "fixedColor": "dark-red", "mode": "fixed" } }
