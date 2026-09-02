@@ -97,8 +97,6 @@ ac_lib = ctypes.CDLL(dll_path)
 ac_lib.update_telemetry.argtypes = [ctypes.POINTER(CarTelemetry)]
 ac_lib.update_telemetry.restype = ctypes.c_int
 ac_lib.init_telemetry.restype = ctypes.c_int
-ac_lib.get_session_info.argtypes = [ctypes.c_wchar_p, ctypes.c_wchar_p]
-ac_lib.get_session_info.restype = ctypes.c_int
 
 if not ac_lib.init_telemetry():
     log.error("No se pudo inicializar el socket UDP hacia Assetto Corsa (init_telemetry devolvio 0).")
@@ -106,46 +104,18 @@ if not ac_lib.init_telemetry():
 
 data = CarTelemetry()
 
-# Id de sesion: agrupa todas las muestras de esta ejecucion del script en Grafana,
-# evitando que se mezclen con las de otra sesion/dia distintos.
+# Assetto Corsa no manda el nombre del circuito/coche por este canal UDP
+# (confirmado capturando trafico real: solo llegan paquetes de telemetria,
+# nunca un paquete distinto con esos datos), asi que se piden por teclado.
 run_id = time.strftime("%Y%m%d-%H%M%S") + "-" + uuid.uuid4().hex[:6]
-# Se completa con circuito/coche en cuanto Assetto Corsa responda el handshake
-# (ver try_resolve_session_label). Hasta entonces se usa el run_id a secas.
-session_id = run_id
-session_resolved = False
-_car_buf = ctypes.create_unicode_buffer(100)
-_track_buf = ctypes.create_unicode_buffer(100)
-
-
-def _clean_name(raw: str) -> str:
-    return "".join(ch for ch in raw if ch.isprintable()).strip()
-
-
-def try_resolve_session_label():
-    """Intenta leer circuito/coche del handshake de AC y renombrar la sesion.
-
-    Best-effort: el layout de HandshakerResponse (wchar_t[100] por campo) es el
-    protocolo UDP conocido de Assetto Corsa pero no se ha podido verificar byte
-    a byte contra el juego real desde este entorno. Si el texto sale vacio o
-    ilegible, se mantiene el run_id como session_id (no rompe nada, solo no
-    queda "bonito").
-    """
-    global session_id, session_resolved
-    if session_resolved:
-        return
-    if not ac_lib.get_session_info(_car_buf, _track_buf):
-        return
-    car = _clean_name(_car_buf.value)
-    track = _clean_name(_track_buf.value)
-    if car and track:
-        session_id = f"{track}_{car}_{run_id}"
-        session_resolved = True
-        log.info("Sesion identificada: circuito=%r coche=%r", track, car)
-    else:
-        # Llego handshake pero sin texto usable: no reintentamos mas (el DLL ya
-        # no vuelve a mandar has_session_info=0), nos quedamos con run_id.
-        session_resolved = True
-        log.warning("Handshake de AC recibido pero sin nombre de circuito/coche legible; usando %s", run_id)
+track = input("Circuito (Enter para omitir): ").strip()
+car = input("Coche (Enter para omitir): ").strip()
+if track and car:
+    session_id = f"{track}_{car}_{run_id}"
+elif track or car:
+    session_id = f"{track or car}_{run_id}"
+else:
+    session_id = run_id
 
 # Reconexion con backoff si el socket empieza a devolver errores reales (-1) de forma persistente.
 CONSECUTIVE_ERROR_LIMIT = 50
@@ -169,9 +139,6 @@ try:
             if waiting:
                 print("\r[OK] Connection established! Recording telemetry to InfluxDB...\n")
                 waiting = False
-
-            if not session_resolved:
-                try_resolve_session_label()
 
             gas_pct = data.gas * 100
             brake_pct = data.brake * 100
