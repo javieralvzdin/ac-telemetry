@@ -177,9 +177,8 @@ try:
             brake_pct = data.brake * 100
 
             # 1. SACAMOS POR PANTALLA LOS DATOS
-            # data.gear ya sigue la convencion del struct: -1=R, 0=N, 1=1a, 2=2a...
             dashboard = (
-                f"\rGear: {data.gear:2d} | "
+                f"\rGear: {data.gear - 1:2d} | "
                 f"RPM: {data.engineRPM:5.0f} | "
                 f"Speed: {data.speed_kmh:5.1f} km/h | "
                 f"Gas(%): {gas_pct:3.0f}% | "
@@ -192,7 +191,7 @@ try:
             point = (
                 influxdb_client.Point("vehicle_dynamics")
                 .tag("session", session_id)
-                .field("gear", data.gear)
+                .field("gear", data.gear - 1)
                 .field("rpm", float(data.engineRPM))
                 .field("speed_kmh", float(data.speed_kmh))
                 .field("gas_pct", float(gas_pct))
