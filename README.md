@@ -106,3 +106,16 @@ To stop the containers and save PC resources, run:
 docker compose down
 
 (Don't worry, data and configurations are saved in local volumes and will not be lost for your next session).
+
+---
+
+## ⚠️ Copyright / Derechos de autor
+
+**English:**
+© Javier Álvarez Diñeiro. All rights reserved. Copying, distribution, modification, or use of this project, in whole or in part, without the express written authorization of the author is strictly prohibited.
+
+**Español:**
+© Javier Álvarez Diñeiro. Todos los derechos reservados. Queda prohibida la copia, distribución, modificación o uso de este proyecto, total o parcial, sin la autorización expresa y por escrito del autor.
+
+
+
