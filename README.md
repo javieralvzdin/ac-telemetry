@@ -109,7 +109,7 @@ docker compose down
 
 ---
 
-## ⚠️ Copyright / Derechos de autor
+## ⚠️ Copyright 
 
 **English:**
 © Javier Álvarez Diñeiro. All rights reserved. Copying, distribution, modification, or use of this project, in whole or in part, without the express written authorization of the author is strictly prohibited.
