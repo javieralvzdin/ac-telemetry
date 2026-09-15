@@ -1,0 +1,135 @@
+.docs-sidebar {
+  --base: var(--color-accent);
+  --pill-bg: rgba(255, 255, 255, 0.04);
+  --pill-text: var(--color-text-secondary);
+  --hover-text: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  font-size: 0.9rem;
+}
+
+.docs-sidebar__title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-text-muted);
+  margin-bottom: 8px;
+  padding: 0 10px;
+}
+
+.pill-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin: 0;
+  padding: 0;
+}
+
+.pill-list > li {
+  display: flex;
+}
+
+.pill {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 38px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: var(--pill-bg);
+  color: var(--pill-text);
+  font-weight: 500;
+  font-size: 0.88rem;
+  text-decoration: none;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.pill .hover-circle {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  border-radius: 50%;
+  background: var(--base);
+  z-index: 1;
+  display: block;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.pill .label-stack {
+  position: relative;
+  z-index: 2;
+  display: inline-block;
+  line-height: 1.2;
+}
+
+.pill .pill-label {
+  position: relative;
+  z-index: 2;
+  display: inline-block;
+  will-change: transform;
+}
+
+.pill .pill-label-hover {
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: var(--hover-text);
+  z-index: 3;
+  display: inline-block;
+  will-change: transform, opacity;
+}
+
+.pill.is-active {
+  font-weight: 600;
+}
+
+.docs-sidebar__section--featured {
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--color-glass-border);
+}
+
+.pill--featured {
+  background: linear-gradient(135deg, var(--color-accent), var(--color-accent-strong));
+  color: #fff;
+  font-weight: 700;
+  box-shadow: 0 10px 30px rgba(185, 28, 28, 0.35);
+}
+
+.pill--featured .hover-circle {
+  background: #ffffff;
+  opacity: 0.16;
+}
+
+.pill--featured .pill-label-hover {
+  color: #fff;
+}
+
+.pill-live-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 8px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7);
+  animation: pill-live-pulse 1.8s ease-out infinite;
+  vertical-align: middle;
+}
+
+@keyframes pill-live-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.6);
+  }
+  70% {
+    box-shadow: 0 0 0 7px rgba(255, 255, 255, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+  }
+}

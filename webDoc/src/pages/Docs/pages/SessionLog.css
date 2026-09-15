@@ -1,0 +1,93 @@
+.session-log__eyebrow {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-accent);
+  margin-bottom: 0.5rem;
+}
+
+.session-log__quote {
+  font-style: italic;
+  color: var(--color-text-secondary);
+}
+
+.session-log__caption {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-text-muted);
+  margin-bottom: 0.5rem;
+}
+
+.session-log__figure {
+  margin: 1.25rem 0 1.75rem;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--color-glass-border);
+  background: #000;
+}
+
+.session-log__figure img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.docs-layout__content .session-log__pipeline {
+  list-style: none;
+  margin: 1.5rem 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.session-log__pipeline li {
+  position: relative;
+  padding: 1rem 0 1rem 28px;
+  border-left: 2px solid var(--color-accent-soft);
+}
+
+.session-log__pipeline li::before {
+  content: '';
+  position: absolute;
+  left: -7px;
+  top: 1.4rem;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  box-shadow: 0 0 0 4px rgba(185, 28, 28, 0.2);
+}
+
+.session-log__pipeline li:last-child {
+  border-left-color: transparent;
+}
+
+.session-log__pipeline-stage {
+  display: inline-block;
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--color-text-primary);
+  margin-right: 8px;
+}
+
+.session-log__pipeline-role {
+  display: inline-block;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-accent);
+}
+
+.session-log__pipeline p {
+  margin: 0.4rem 0 0;
+}
+
+.session-log__copyright {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-glass-border);
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+}
