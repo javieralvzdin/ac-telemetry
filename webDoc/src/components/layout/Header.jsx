@@ -5,12 +5,11 @@ export default function Header() {
   return (
     <header className="site-header">
       <Link to="/" className="site-header__brand">
-        <img src="/docs-assets/assetto-corsa-logo.png" alt="" className="site-header__logo" />
-        AC Telemetry
+        <span className="site-header__brand-text">AC Telemetry</span>
+        <span className="site-header__logo-chip">
+          <img src="/docs-assets/assetto-corsa-logo.png" alt="Assetto Corsa" className="site-header__logo" />
+        </span>
       </Link>
-      <nav className="site-header__nav">
-        <Link to="/docs">Docs</Link>
-      </nav>
     </header>
   );
 }

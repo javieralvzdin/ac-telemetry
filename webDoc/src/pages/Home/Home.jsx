@@ -1,4 +1,5 @@
-import { Link, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useRef } from 'react';
 import ScrollExpand from '../../components/effects/ScrollExpand.jsx';
 import Sidebar from '../Docs/Sidebar.jsx';
 import SearchBox from '../Docs/SearchBox.jsx';
@@ -11,6 +12,14 @@ export default function Home() {
   const defaultSlug = flattenNav()[0].slug;
   const activeSlug = slug && docPages[slug] ? slug : defaultSlug;
   const ActivePage = docPages[activeSlug];
+  const docsSectionRef = useRef(null);
+  const navigate = useNavigate();
+
+  const goToSessionLog = (event) => {
+    event.preventDefault();
+    navigate('/docs/session-log');
+    docsSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
 
   return (
     <div className="home">
@@ -23,14 +32,14 @@ export default function Home() {
       >
         <div className="home__logo-card">
           <img src="/docs-assets/assetto-corsa-logo.png" alt="Assetto Corsa" className="home__logo" />
-          <Link to="/docs/session-log" className="home__session-cta">
+          <a href="/docs/session-log" className="home__session-cta" onClick={goToSessionLog}>
             <span className="pill-live-dot" aria-hidden="true" />
             View Session Log
-          </Link>
+          </a>
         </div>
       </ScrollExpand>
 
-      <section className="docs-layout">
+      <section className="docs-layout" ref={docsSectionRef}>
         <aside className="docs-layout__sidebar">
           <SearchBox />
           <Sidebar />
