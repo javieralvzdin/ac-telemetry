@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { gsap } from 'gsap';
 import { nav } from '../../data/nav.js';
@@ -7,11 +7,29 @@ import { useT } from '../../i18n/strings.js';
 import './Sidebar.css';
 
 const EASE = 'power2.out';
+const MOBILE_QUERY = '(max-width: 860px)';
+
+const useIsMobile = () => {
+  const [isMobile, setIsMobile] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia(MOBILE_QUERY).matches
+  );
+
+  useEffect(() => {
+    const mql = window.matchMedia(MOBILE_QUERY);
+    const onChange = (e) => setIsMobile(e.matches);
+    mql.addEventListener('change', onChange);
+    return () => mql.removeEventListener('change', onChange);
+  }, []);
+
+  return isMobile;
+};
 
 export default function Sidebar() {
   const location = useLocation();
   const { lang } = useLanguage();
   const t = useT();
+  const isMobile = useIsMobile();
+  const [mobileOpen, setMobileOpen] = useState(false);
   const circleRefs = useRef([]);
   const tlRefs = useRef([]);
   const activeTweenRefs = useRef([]);
@@ -20,6 +38,15 @@ export default function Sidebar() {
   const activeIndex = flatPages.findIndex((page) => location.pathname === `/docs/${page.slug}`);
 
   useEffect(() => {
+    setMobileOpen(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    // The hover-circle morph is a desktop-only, mouse-driven affordance; on mobile
+    // the sidebar renders a completely different (GSAP-free) dropdown markup below,
+    // so there is nothing for this layout pass to measure or animate.
+    if (isMobile) return undefined;
+
     const layout = () => {
       circleRefs.current.forEach((circle, index) => {
         if (!circle?.parentElement) return;
@@ -61,7 +88,7 @@ export default function Sidebar() {
       document.fonts.ready.then(layout).catch(() => {});
     }
     return () => window.removeEventListener('resize', layout);
-  }, [flatPages.length, activeIndex, lang]);
+  }, [flatPages.length, activeIndex, lang, isMobile]);
 
   const handleEnter = (i) => {
     if (i === activeIndex) return;
@@ -80,6 +107,68 @@ export default function Sidebar() {
   };
 
   let flatIndex = -1;
+
+  if (isMobile) {
+    const activePage = flatPages[activeIndex];
+
+    return (
+      <nav aria-label={t.docsNavAriaLabel} className="docs-sidebar docs-sidebar--mobile">
+        <button
+          type="button"
+          className="docs-sidebar__mobile-toggle"
+          onClick={() => setMobileOpen((open) => !open)}
+          aria-expanded={mobileOpen}
+        >
+          <span className="docs-sidebar__mobile-toggle-label">
+            {activePage ? activePage.title[lang] : t.docsNavAriaLabel}
+          </span>
+          <svg
+            className={`docs-sidebar__mobile-chevron${mobileOpen ? ' is-open' : ''}`}
+            viewBox="0 0 16 16"
+            width="14"
+            height="14"
+            aria-hidden="true"
+          >
+            <path
+              d="M3.5 5.5L8 10l4.5-4.5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </button>
+        <div className={`docs-sidebar__mobile-panel${mobileOpen ? ' is-open' : ''}`}>
+          {nav.map((section) => (
+            <div
+              key={section.title.en}
+              className={`docs-sidebar__section${section.featured ? ' docs-sidebar__section--featured' : ''}`}
+            >
+              <p className="docs-sidebar__title">{section.title[lang]}</p>
+              <ul className="pill-list">
+                {section.pages.map((page) => {
+                  const href = `/docs/${page.slug}`;
+                  const isActive = location.pathname === href;
+                  return (
+                    <li key={page.slug}>
+                      <Link
+                        to={href}
+                        className={`pill pill--mobile${section.featured ? ' pill--featured' : ''}${isActive ? ' is-active' : ''}`}
+                      >
+                        {section.featured ? <span className="pill-live-dot" aria-hidden="true" /> : null}
+                        {page.title[lang]}
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </nav>
+    );
+  }
 
   return (
     <nav aria-label={t.docsNavAriaLabel} className="docs-sidebar">

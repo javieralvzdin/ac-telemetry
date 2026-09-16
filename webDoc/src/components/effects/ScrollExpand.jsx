@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import './ScrollExpand.css';
 
 const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
@@ -6,6 +6,23 @@ const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
 const smoothstep = (edge0, edge1, x) => {
   const t = clamp((x - edge0) / (edge1 - edge0 || 1e-6), 0, 1);
   return t * t * (3 - 2 * t);
+};
+
+const MOBILE_QUERY = '(max-width: 860px)';
+
+const useIsMobile = () => {
+  const [isMobile, setIsMobile] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia(MOBILE_QUERY).matches
+  );
+
+  useEffect(() => {
+    const mql = window.matchMedia(MOBILE_QUERY);
+    const onChange = (e) => setIsMobile(e.matches);
+    mql.addEventListener('change', onChange);
+    return () => mql.removeEventListener('change', onChange);
+  }, []);
+
+  return isMobile;
 };
 
 const ScrollExpand = ({
@@ -22,6 +39,12 @@ const ScrollExpand = ({
   endHeight = 70,
   endRadius = 32,
   mediaZoom = 1.35,
+  // Mobile-only overrides. Desktop keeps startWidth/endWidth/mediaZoom above untouched;
+  // on narrow viewports the same width percentages clip the frame down to a thin vertical
+  // sliver of the source image, so mobile gets its own, much gentler width curve.
+  mobileStartWidth = 92,
+  mobileEndWidth = 100,
+  mobileMediaZoom = 1.15,
   scrollDistance = 1.2,
   holdDistance = 0.35,
   smoothing = 0.1,
@@ -33,6 +56,7 @@ const ScrollExpand = ({
   style,
   ...rest
 }) => {
+  const isMobile = useIsMobile();
   const rootRef = useRef(null);
   const trackRef = useRef(null);
   const stageRef = useRef(null);
@@ -46,13 +70,13 @@ const ScrollExpand = ({
 
   const propsRef = useRef({});
   propsRef.current = {
-    startWidth,
+    startWidth: isMobile ? mobileStartWidth : startWidth,
     startHeight,
     startRadius,
-    endWidth,
+    endWidth: isMobile ? mobileEndWidth : endWidth,
     endHeight,
     endRadius,
-    mediaZoom,
+    mediaZoom: isMobile ? mobileMediaZoom : mediaZoom,
     scrollDistance,
     holdDistance,
     smoothing,
