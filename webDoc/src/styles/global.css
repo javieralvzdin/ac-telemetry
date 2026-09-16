@@ -70,8 +70,24 @@ img {
 
 .app-background {
   position: fixed;
-  inset: 0;
+  top: 0;
+  bottom: 0;
   z-index: -1;
+}
+
+.app-background--center {
+  left: 0;
+  right: 0;
+}
+
+.app-background--left {
+  left: 0;
+  width: 32vw;
+}
+
+.app-background--right {
+  right: 0;
+  width: 32vw;
 }
 
 .app-main {
