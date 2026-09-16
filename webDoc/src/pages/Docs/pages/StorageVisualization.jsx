@@ -19,9 +19,6 @@ export default function StorageVisualization() {
         just to watch it. To edit the dashboard or its config, log in with the{' '}
         <code>GRAFANA_ADMIN_USER</code> / <code>GRAFANA_ADMIN_PASSWORD</code> you set in <code>.env</code>.
       </p>
-      <p className="docs-layout__pending">
-        [contenido pendiente: detalle de los paneles/queries concretos del dashboard]
-      </p>
     </>
   );
 }

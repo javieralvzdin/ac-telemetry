@@ -17,9 +17,6 @@ export default function HardwareBridge() {
         than talking UDP itself; see <Link to="/docs/data-pipeline">Data Pipeline</Link> for how that hand-off
         works.
       </p>
-      <p className="docs-layout__pending">
-        [contenido pendiente: detalle del protocolo UDP y de las variables expuestas por el DLL]
-      </p>
     </>
   );
 }

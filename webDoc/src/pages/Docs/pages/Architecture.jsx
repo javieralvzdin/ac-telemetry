@@ -22,9 +22,6 @@ export default function Architecture() {
           <Link to="/docs/storage-visualization">Storage &amp; Visualization</Link>.
         </li>
       </ol>
-      <p className="docs-layout__pending">
-        [contenido pendiente: diagrama de arquitectura del PDF, si existe uno]
-      </p>
     </>
   );
 }

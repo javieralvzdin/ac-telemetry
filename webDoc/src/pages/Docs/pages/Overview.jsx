@@ -29,9 +29,6 @@ export default function Overview() {
           <Link to="/docs/troubleshooting">Troubleshooting</Link> — fixes for the most common issues.
         </li>
       </ul>
-      <p className="docs-layout__pending">
-        [contenido pendiente: ampliar con el detalle del PDF fuente cuando se extraiga]
-      </p>
     </>
   );
 }

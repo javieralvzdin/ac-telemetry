@@ -16,7 +16,6 @@ export default function DataPipeline() {
         You must be in the car (in the pits or on track) for Assetto Corsa to start emitting telemetry — otherwise
         the script has nothing to read.
       </p>
-      <p className="docs-layout__pending">[contenido pendiente: lista completa de variables procesadas]</p>
     </>
   );
 }

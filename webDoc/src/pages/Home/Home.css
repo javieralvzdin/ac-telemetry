@@ -1,11 +1,11 @@
 .home__github-card {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   width: fit-content;
   max-width: calc(100% - 48px);
-  margin: 16px auto 4px;
-  padding: 12px 20px;
+  margin: 16px auto 0;
+  padding: 16px 26px;
   border-radius: var(--radius-lg);
   background: var(--color-surface-alt);
   border: 1px solid var(--color-glass-border);
@@ -29,13 +29,27 @@
 }
 
 .home__github-card-label {
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   font-weight: 600;
 }
 
 .home__github-card-repo {
-  font-size: 0.75rem;
+  font-size: 0.82rem;
   color: var(--color-text-muted);
+}
+
+.home__stack-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin: 28px auto 0;
+}
+
+.home__stack-badge-sm {
+  display: block;
+  width: 36px;
+  height: 36px;
 }
 
 .home__logo-card {
@@ -170,14 +184,6 @@
   font-size: 0.9em;
 }
 
-.docs-layout__pending {
-  font-size: 0.85rem;
-  color: var(--color-text-muted);
-  font-style: italic;
-  border-left: 2px solid var(--color-accent-strong);
-  padding-left: 0.75rem;
-}
-
 @media (max-width: 860px) {
   .docs-layout {
     flex-direction: column;
@@ -190,5 +196,9 @@
 
   .docs-layout__content {
     padding: 28px 24px;
+  }
+
+  .home__stack-row {
+    display: none;
   }
 }
