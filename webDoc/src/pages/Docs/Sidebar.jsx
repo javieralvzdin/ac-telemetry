@@ -2,12 +2,16 @@ import { useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { gsap } from 'gsap';
 import { nav } from '../../data/nav.js';
+import { useLanguage } from '../../i18n/LanguageContext.jsx';
+import { useT } from '../../i18n/strings.js';
 import './Sidebar.css';
 
 const EASE = 'power2.out';
 
 export default function Sidebar() {
   const location = useLocation();
+  const { lang } = useLanguage();
+  const t = useT();
   const circleRefs = useRef([]);
   const tlRefs = useRef([]);
   const activeTweenRefs = useRef([]);
@@ -57,7 +61,7 @@ export default function Sidebar() {
       document.fonts.ready.then(layout).catch(() => {});
     }
     return () => window.removeEventListener('resize', layout);
-  }, [flatPages.length, activeIndex]);
+  }, [flatPages.length, activeIndex, lang]);
 
   const handleEnter = (i) => {
     if (i === activeIndex) return;
@@ -78,19 +82,20 @@ export default function Sidebar() {
   let flatIndex = -1;
 
   return (
-    <nav aria-label="Documentation" className="docs-sidebar">
+    <nav aria-label={t.docsNavAriaLabel} className="docs-sidebar">
       {nav.map((section) => (
         <div
-          key={section.title}
+          key={section.title.en}
           className={`docs-sidebar__section${section.featured ? ' docs-sidebar__section--featured' : ''}`}
         >
-          <p className="docs-sidebar__title">{section.title}</p>
+          <p className="docs-sidebar__title">{section.title[lang]}</p>
           <ul className="pill-list">
             {section.pages.map((page) => {
               flatIndex += 1;
               const index = flatIndex;
               const href = `/docs/${page.slug}`;
               const isActive = index === activeIndex;
+              const label = page.title[lang];
               return (
                 <li key={page.slug}>
                   <Link
@@ -109,10 +114,10 @@ export default function Sidebar() {
                     <span className="label-stack">
                       <span className="pill-label">
                         {section.featured ? <span className="pill-live-dot" aria-hidden="true" /> : null}
-                        {page.title}
+                        {label}
                       </span>
                       <span className="pill-label-hover" aria-hidden="true">
-                        {page.title}
+                        {label}
                       </span>
                     </span>
                   </Link>

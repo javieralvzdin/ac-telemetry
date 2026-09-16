@@ -6,9 +6,11 @@ import Sidebar from '../Docs/Sidebar.jsx';
 import SearchBox from '../Docs/SearchBox.jsx';
 import { flattenNav } from '../../data/nav.js';
 import { docPages } from '../../data/docPages.js';
+import { useT } from '../../i18n/strings.js';
 import './Home.css';
 
 export default function Home() {
+  const t = useT();
   const { slug } = useParams();
   const defaultSlug = flattenNav()[0].slug;
   const activeSlug = slug && docPages[slug] ? slug : defaultSlug;
@@ -37,7 +39,7 @@ export default function Home() {
           />
         </svg>
         <span className="home__github-card-text">
-          <span className="home__github-card-label">View source on GitHub</span>
+          <span className="home__github-card-label">{t.githubLabel}</span>
           <span className="home__github-card-repo">javieralvzdin/ac-telemetry</span>
         </span>
       </a>
@@ -59,8 +61,8 @@ export default function Home() {
 
       <ScrollExpand
         src="/docs-assets/showroom.jpg"
-        alt="Assetto Corsa showroom"
-        scrollHint="Scroll"
+        alt={t.heroShowroomAlt}
+        scrollHint={t.scrollHint}
         startHeight={94}
         endHeight={97}
         useWindowScroll
@@ -69,7 +71,7 @@ export default function Home() {
           <img src="/docs-assets/assetto-corsa-logo.png" alt="Assetto Corsa" className="home__logo" />
           <a href="/docs/session-log" className="home__session-cta" onClick={goToSessionLog}>
             <span className="pill-live-dot" aria-hidden="true" />
-            View Session Log
+            {t.sessionCta}
           </a>
         </div>
       </ScrollExpand>

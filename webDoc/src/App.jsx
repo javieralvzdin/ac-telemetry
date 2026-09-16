@@ -3,10 +3,11 @@ import LightPillar from './components/background/LightPillar.jsx';
 import Header from './components/layout/Header.jsx';
 import Home from './pages/Home/Home.jsx';
 import { flattenNav } from './data/nav.js';
+import { LanguageProvider } from './i18n/LanguageContext.jsx';
 
 export default function App() {
   return (
-    <>
+    <LanguageProvider>
       <div className="app-background" aria-hidden="true">
         <LightPillar
           topColor="#B91C1C"
@@ -27,6 +28,6 @@ export default function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
-    </>
+    </LanguageProvider>
   );
 }

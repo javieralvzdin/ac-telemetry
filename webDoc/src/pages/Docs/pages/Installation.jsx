@@ -1,4 +1,52 @@
+import { useLanguage } from '../../../i18n/LanguageContext.jsx';
+
 export default function Installation() {
+  const { lang } = useLanguage();
+
+  if (lang === 'es') {
+    return (
+      <>
+        <h1>Instalación y uso</h1>
+        <p>
+          <strong>Requisitos:</strong> Windows, Assetto Corsa, Docker Desktop, Python 3.x. Este proyecto solo
+          funciona en local — Assetto Corsa y este pipeline deben ejecutarse en la misma máquina.
+        </p>
+        <ol>
+          <li>
+            <strong>Configura tus secretos</strong> — copia <code>.env.example</code> a <code>.env</code> y pon tus
+            propios valores (token de InfluxDB, contraseñas de administrador de InfluxDB/Grafana).{' '}
+            <code>.env</code> está en el <code>.gitignore</code> — nunca lo subas al repositorio.
+          </li>
+          <li>
+            <strong>Levanta la infraestructura</strong> — desde la carpeta raíz del proyecto, ejecuta{' '}
+            <code>docker compose up -d</code>. Esto descarga e inicia InfluxDB y Grafana en segundo plano,
+            autoconfigurados con tus valores de <code>.env</code>.
+          </li>
+          <li>
+            <strong>Instala las dependencias de Python</strong> — <code>pip install -r requirements.txt</code>.
+          </li>
+          <li>
+            <strong>Sal a pista</strong> — abre Assetto Corsa (o Content Manager) y entra en una sesión de práctica
+            o carrera. Debes estar en el coche para que el juego empiece a emitir telemetría.
+          </li>
+          <li>
+            <strong>Lanza el puente de datos</strong> — ejecuta <code>python dashboard.py</code>. Pedirá{' '}
+            <strong>circuito</strong> y <strong>coche</strong> (pulsa Intro para saltar cualquiera de los dos). Si
+            todo va bien, verás los datos enviándose en la consola.
+          </li>
+        </ol>
+        <p>
+          Después abre <code>http://localhost:3000</code> para ver el panel al instante — no hace falta iniciar
+          sesión en Grafana.
+        </p>
+        <p>
+          Para apagarlo todo: cierra la consola de Python (Ctrl+C) y luego ejecuta{' '}
+          <code>docker compose down</code> (los datos y la configuración se conservan en los volúmenes locales).
+        </p>
+      </>
+    );
+  }
+
   return (
     <>
       <h1>Installation &amp; Usage</h1>
@@ -26,8 +74,8 @@ export default function Installation() {
         </li>
         <li>
           <strong>Launch the data bridge</strong> — run <code>python dashboard.py</code>. It will ask for{' '}
-          <strong>circuito</strong> and <strong>coche</strong> (press Enter to skip either). If everything goes
-          well, you'll see data being sent in the console.
+          <strong>circuit</strong> and <strong>car</strong> (press Enter to skip either). If everything goes well,
+          you'll see data being sent in the console.
         </li>
       </ol>
       <p>

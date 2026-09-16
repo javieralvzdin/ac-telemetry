@@ -1,6 +1,138 @@
+import { useLanguage } from '../../../i18n/LanguageContext.jsx';
 import './SessionLog.css';
 
 export default function SessionLog() {
+  const { lang } = useLanguage();
+
+  if (lang === 'es') {
+    return (
+      <div className="session-log">
+        <p className="session-log__eyebrow">Circuit de Barcelona-Catalunya · Porsche 911 RSR (2017)</p>
+        <h1>Registro de sesión</h1>
+        <p className="session-log__quote">
+          Un pipeline de telemetría en tiempo real para Assetto Corsa. Un lector de memoria compartida a medida
+          captura los datos de volante, acelerador, freno, RPM y marcha a alta frecuencia y los envía a InfluxDB
+          para visualizarlos en Grafana. Este registro documenta una única sesión en el Circuit de
+          Barcelona-Catalunya, comparando una vuelta de calentamiento con una vuelta rápida posterior en un Porsche
+          911 RSR (2017).
+        </p>
+
+        <h2>Resumen de canales</h2>
+        <p className="session-log__quote">
+          Tres canales registrados en paralelo durante toda la vuelta: velocidad con la traza de acelerador y freno,
+          ángulo de volante, y RPM del motor junto con la marcha activa. Los puntos de cambio se ajustan con
+          precisión al límite de RPM, pasando de 1ª marcha a la salida de boxes hasta 6ª en la recta trasera.
+        </p>
+        <figure className="session-log__figure">
+          <img
+            src="/docs-assets/session-log/channel-overview.png"
+            alt="Panel de Grafana: velocidad/pedales, ángulo de volante, RPM/marcha"
+          />
+        </figure>
+
+        <h2>Dos vueltas, una línea</h2>
+        <p className="session-log__caption">// Velocidad – Freno/Acelerador //</p>
+        <p>
+          Las mismas curvas, dos estados distintos del coche — entradas prudentes en una vuelta en frío, compromiso
+          total una vez que los neumáticos están en temperatura.
+        </p>
+        <figure className="session-log__figure">
+          <img
+            src="/docs-assets/session-log/two-laps-speed.png"
+            alt="Comparación de velocidad entre la vuelta de calentamiento y la vuelta rápida"
+          />
+        </figure>
+        <p className="session-log__quote">
+          La velocidad punta antes de la primera zona de frenada sube de 180 km/h a 210 km/h, y la velocidad mínima
+          en curva pasa de la banda de 55–75 km/h a 70–95 km/h — una vuelta más rápida construida en ambos extremos
+          de la zona de frenada, no solo en la recta.
+        </p>
+
+        <p className="session-log__quote">
+          El ángulo de volante se profundiza bajo carga. El pico de entrada sube de 63° en la vuelta de
+          calentamiento a 108° en la misma T5 en la vuelta rápida, un giro más tardío y más brusco que compensa la
+          velocidad extra llevada al vértice.
+        </p>
+        <figure className="session-log__figure">
+          <img
+            src="/docs-assets/session-log/two-laps-steering.png"
+            alt="Comparación del ángulo de volante entre la vuelta de calentamiento y la vuelta rápida"
+          />
+        </figure>
+
+        <h2>Dónde ocurre</h2>
+        <p className="session-log__quote">
+          Cinco cambios de dirección — de T1 a T5 — definen el sector técnico central de la vuelta. Al superponer
+          las trazas de volante y velocidad sobre el mapa del circuito, T5 destaca como la entrada más exigente de
+          la sesión: el giro de 108° de la vuelta rápida, que coincide con el punto de frenada más profundo de la
+          traza de velocidad. El trazado completo tiene 16 curvas numeradas, con la entrada y salida de boxes
+          marcadas a ambos lados de la línea de meta.
+        </p>
+        <figure className="session-log__figure">
+          <img
+            src="/docs-assets/session-log/where-it-happens.png"
+            alt="Superposición de velocidad, volante y mapa del circuito mostrando las curvas T1 a T5"
+          />
+        </figure>
+
+        <h2>Del simulador a la pantalla</h2>
+        <p>Cuatro etapas convierten la física en bruto del simulador en los gráficos de estas páginas.</p>
+        <ol className="session-log__pipeline">
+          <li>
+            <span className="session-log__pipeline-stage">Assetto Corsa</span>
+            <span className="session-log__pipeline-role">Memoria compartida</span>
+            <p>
+              El simulador expone el estado de física y gráficos a través de memoria compartida de Windows en cada
+              fotograma.
+            </p>
+          </li>
+          <li>
+            <span className="session-log__pipeline-stage">ac_telemetry.dll</span>
+            <span className="session-log__pipeline-role">Lector a medida</span>
+            <p>
+              Un módulo nativo lee los bloques de memoria compartida y extrae los canales usados en este informe:
+              velocidad, acelerador, freno, ángulo de volante, RPM y marcha.
+            </p>
+          </li>
+          <li>
+            <span className="session-log__pipeline-stage">InfluxDB</span>
+            <span className="session-log__pipeline-role">Almacén de series temporales</span>
+            <p>
+              Las muestras extraídas se escriben como puntos de series temporales, indexadas por sesión y vuelta
+              para consultas posteriores.
+            </p>
+          </li>
+          <li>
+            <span className="session-log__pipeline-stage">Grafana</span>
+            <span className="session-log__pipeline-role">Visualización</span>
+            <p>
+              Los paneles consultan InfluxDB directamente para renderizar los gráficos mostrados a lo largo de este
+              documento.
+            </p>
+          </li>
+        </ol>
+
+        <p className="session-log__quote">
+          Construir este pipeline de principio a fin, desde leer offsets en bruto de memoria compartida hasta dar
+          forma a consultas de InfluxDB convertidas en paneles legibles de Grafana, supuso trabajar en toda la pila
+          de un sistema de datos en tiempo real, no solo en la superficie. Obligó a mirar de cerca las frecuencias
+          de muestreo, los tipos de datos, y cómo un pequeño error de ingesta se convierte silenciosamente en un
+          gráfico engañoso tres pasos más adelante. Convertir el ángulo de volante, la entrada de pedales y las RPM
+          en una historia legible, en lugar de un muro de números, fue tanto un problema de diseño como técnico. Lo
+          que empezó como una forma de ver los datos de una vuelta se convirtió en práctica real con almacenamiento
+          de series temporales, creación de dashboards, y depuración de un pipeline en vivo bajo condiciones reales
+          y caóticas.
+        </p>
+
+        <p className="session-log__copyright">
+          © 2026 Javier Álvarez Diñeiro · Todos los derechos reservados. Este proyecto, incluyendo su código
+          fuente, el pipeline de telemetría y los datos, es propiedad del autor. Ninguna parte puede reproducirse,
+          distribuirse o reutilizarse sin permiso por escrito.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="session-log">
       <p className="session-log__eyebrow">Circuit de Barcelona-Catalunya · Porsche 911 RSR (2017)</p>
