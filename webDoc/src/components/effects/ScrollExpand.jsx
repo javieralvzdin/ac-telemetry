@@ -117,6 +117,7 @@ const ScrollExpand = ({
     let target = 0;
     let stageH = 0;
     let running = false;
+    let lastWidth = window.innerWidth;
 
     const measure = () => {
       const c = propsRef.current;
@@ -169,6 +170,13 @@ const ScrollExpand = ({
     };
 
     const onResize = () => {
+      const widthChanged = window.innerWidth !== lastWidth;
+      lastWidth = window.innerWidth;
+      // On mobile, the address bar hiding/showing while the user scrolls fires
+      // `resize` with only the viewport height changed. Re-measuring against that
+      // moving target mid-scroll is what causes the hero to jump/stutter, so for
+      // the window-scroll variant we only react to genuine width changes.
+      if (propsRef.current.useWindowScroll && !widthChanged) return;
       measure();
       target = readProgress();
       current = target;
@@ -183,7 +191,11 @@ const ScrollExpand = ({
     const scroller = useWindowScroll ? window : root;
     scroller.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', onResize);
-    const ro = new ResizeObserver(onResize);
+    const ro = new ResizeObserver(() => {
+      // In window-scroll mode the root's own box just mirrors the height we set
+      // in measure(); observing it too creates a feedback loop with `onResize`.
+      if (!propsRef.current.useWindowScroll) onResize();
+    });
     ro.observe(root);
 
     return () => {

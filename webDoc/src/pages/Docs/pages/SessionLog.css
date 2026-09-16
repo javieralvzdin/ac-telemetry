@@ -45,23 +45,19 @@
 .session-log__pipeline li {
   position: relative;
   padding: 1rem 0 1rem 28px;
-  border-left: 2px solid var(--color-accent-soft);
 }
 
 .session-log__pipeline li::before {
   content: '';
   position: absolute;
-  left: -7px;
+  left: 1px;
   top: 1.4rem;
   width: 12px;
   height: 12px;
   border-radius: 50%;
+  transform: translateX(-50%);
   background: var(--color-accent);
   box-shadow: 0 0 0 4px rgba(185, 28, 28, 0.2);
-}
-
-.session-log__pipeline li:last-child {
-  border-left-color: transparent;
 }
 
 .session-log__pipeline-stage {
@@ -77,7 +73,10 @@
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: var(--color-accent);
+  /* var(--color-accent) is a dark red tuned for buttons/glows; as small text on
+     this near-black background it falls below readable contrast, so this label
+     uses a brighter red kept close to the brand hue. */
+  color: #ef4444;
 }
 
 .session-log__pipeline p {
