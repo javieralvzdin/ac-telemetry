@@ -1,4 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 import LightPillar from './components/background/LightPillar.jsx';
 import Header from './components/layout/Header.jsx';
 import Home from './pages/Home/Home.jsx';
@@ -52,6 +54,8 @@ export default function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
+      <Analytics />
+      <SpeedInsights />
     </LanguageProvider>
   );
 }
