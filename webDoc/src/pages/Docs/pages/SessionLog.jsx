@@ -33,7 +33,7 @@ export default function SessionLog() {
         <h2>Dos vueltas, una línea</h2>
         <p className="session-log__caption">// Velocidad – Freno/Acelerador //</p>
         <p>
-          Las mismas curvas, dos estados distintos del coche — entradas prudentes en una vuelta en frío, compromiso
+          Las mismas curvas, dos estados distintos del coche: entradas prudentes en una vuelta en frío, compromiso
           total una vez que los neumáticos están en temperatura.
         </p>
         <figure className="session-log__figure">
@@ -44,7 +44,7 @@ export default function SessionLog() {
         </figure>
         <p className="session-log__quote">
           La velocidad punta antes de la primera zona de frenada sube de 180 km/h a 210 km/h, y la velocidad mínima
-          en curva pasa de la banda de 55–75 km/h a 70–95 km/h — una vuelta más rápida construida en ambos extremos
+          en curva pasa de la banda de 55–75 km/h a 70–95 km/h: una vuelta más rápida construida en ambos extremos
           de la zona de frenada, no solo en la recta.
         </p>
 
@@ -62,7 +62,7 @@ export default function SessionLog() {
 
         <h2>Dónde ocurre</h2>
         <p className="session-log__quote">
-          Cinco cambios de dirección — de T1 a T5 — definen el sector técnico central de la vuelta. Al superponer
+          Cinco cambios de dirección, de T1 a T5, definen el sector técnico central de la vuelta. Al superponer
           las trazas de volante y velocidad sobre el mapa del circuito, T5 destaca como la entrada más exigente de
           la sesión: el giro de 108° de la vuelta rápida, que coincide con el punto de frenada más profundo de la
           traza de velocidad. El trazado completo tiene 16 curvas numeradas, con la entrada y salida de boxes
@@ -157,7 +157,7 @@ export default function SessionLog() {
       <h2>Two Laps, One Line</h2>
       <p className="session-log__caption">// Speed – Brake/Throttle //</p>
       <p>
-        Same corners, two different states of the car — cautious inputs on a cold lap, full commitment once the
+        Same corners, two different states of the car: cautious inputs on a cold lap, full commitment once the
         tires are in.
       </p>
       <figure className="session-log__figure">
@@ -165,7 +165,7 @@ export default function SessionLog() {
       </figure>
       <p className="session-log__quote">
         Top speed before the first braking zone rises from 180 km/h to 210 km/h, and minimum corner speed lifts
-        from the 55–75 km/h band to 70–95 km/h — a faster lap built at both ends of the braking zone, not just
+        from the 55–75 km/h band to 70–95 km/h: a faster lap built at both ends of the braking zone, not just
         on the straight.
       </p>
 
@@ -179,7 +179,7 @@ export default function SessionLog() {
 
       <h2>Where It Happens</h2>
       <p className="session-log__quote">
-        Five direction changes — T1 through T5 — define the technical middle sector of the lap. Overlaying the
+        Five direction changes, T1 through T5, define the technical middle sector of the lap. Overlaying the
         steering and speed traces on the track map pinpoints T5 as the session's sharpest input: the 108° lock
         from the hotlap, matched to the deepest braking event on the speed trace. The full layout runs 16
         numbered corners, with pit entry and exit marked either side of the start/finish line.

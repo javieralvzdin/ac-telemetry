@@ -24,14 +24,14 @@ export default function Overview() {
         <p>Por dónde seguir:</p>
         <ul>
           <li>
-            <Link to="/docs/architecture">Arquitectura del sistema</Link> — las tres capas que hacen que esto
+            <Link to="/docs/architecture">Arquitectura del sistema</Link>: las tres capas que hacen que esto
             funcione.
           </li>
           <li>
-            <Link to="/docs/installation">Instalación y uso</Link> — ponlo en marcha de principio a fin.
+            <Link to="/docs/installation">Instalación y uso</Link>: ponlo en marcha de principio a fin.
           </li>
           <li>
-            <Link to="/docs/troubleshooting">Solución de problemas</Link> — arreglos para los problemas más
+            <Link to="/docs/troubleshooting">Solución de problemas</Link>: arreglos para los problemas más
             comunes.
           </li>
         </ul>
@@ -58,13 +58,13 @@ export default function Overview() {
       <p>Where to go next:</p>
       <ul>
         <li>
-          <Link to="/docs/architecture">System Architecture</Link> — the three layers that make this work.
+          <Link to="/docs/architecture">System Architecture</Link>: the three layers that make this work.
         </li>
         <li>
-          <Link to="/docs/installation">Installation &amp; Usage</Link> — get it running end to end.
+          <Link to="/docs/installation">Installation &amp; Usage</Link>: get it running end to end.
         </li>
         <li>
-          <Link to="/docs/troubleshooting">Troubleshooting</Link> — fixes for the most common issues.
+          <Link to="/docs/troubleshooting">Troubleshooting</Link>: fixes for the most common issues.
         </li>
       </ul>
     </>

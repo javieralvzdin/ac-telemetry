@@ -18,11 +18,11 @@ export default function StorageVisualization() {
         </ul>
         <p>
           Ambos se aprovisionan automáticamente con Docker Compose usando los valores de tu archivo{' '}
-          <code>.env</code> — no hace falta configurar el panel a mano.
+          <code>.env</code>, sin necesidad de configurar el panel a mano.
         </p>
         <p>
-          El panel se puede ver de forma anónima (solo lectura) en <code>http://localhost:3000</code> — no hace
-          falta iniciar sesión solo para verlo. Para editar el panel o su configuración, inicia sesión con el{' '}
+          El panel se puede ver de forma anónima (solo lectura) en <code>http://localhost:3000</code>, sin iniciar
+          sesión solo para verlo. Para editar el panel o su configuración, inicia sesión con el{' '}
           <code>GRAFANA_ADMIN_USER</code> / <code>GRAFANA_ADMIN_PASSWORD</code> que pusiste en <code>.env</code>.
         </p>
       </>
@@ -41,12 +41,12 @@ export default function StorageVisualization() {
         </li>
       </ul>
       <p>
-        Both are provisioned automatically by Docker Compose using the values from your <code>.env</code> file — no
-        manual dashboard setup is needed.
+        Both are provisioned automatically by Docker Compose using the values from your <code>.env</code> file, with
+        no manual dashboard setup needed.
       </p>
       <p>
-        The dashboard is viewable anonymously (read-only) at <code>http://localhost:3000</code> — no login required
-        just to watch it. To edit the dashboard or its config, log in with the{' '}
+        The dashboard is viewable anonymously (read-only) at <code>http://localhost:3000</code>, with no login
+        required just to watch it. To edit the dashboard or its config, log in with the{' '}
         <code>GRAFANA_ADMIN_USER</code> / <code>GRAFANA_ADMIN_PASSWORD</code> you set in <code>.env</code>.
       </p>
     </>

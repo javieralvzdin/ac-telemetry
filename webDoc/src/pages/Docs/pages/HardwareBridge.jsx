@@ -14,7 +14,7 @@ export default function HardwareBridge() {
         </p>
         <p>
           Se distribuye precompilada y versionada en el repositorio, así que no hace falta un compilador de C para
-          ejecutarla — solo funciona en Windows, ya que habla con la interfaz UDP local de Assetto Corsa.
+          ejecutarla. Solo funciona en Windows, ya que habla con la interfaz UDP local de Assetto Corsa.
         </p>
         <p>
           La capa de Python (<code>dashboard.py</code>) carga esta DLL mediante la librería <code>ctypes</code> de
@@ -33,7 +33,7 @@ export default function HardwareBridge() {
         directly from the simulator's physics engine.
       </p>
       <p>
-        It ships precompiled and committed in the repository, so no C compiler is required to run it — it only
+        It ships precompiled and committed in the repository, so no C compiler is required to run it. It only
         works on Windows, since it talks to Assetto Corsa's local UDP interface.
       </p>
       <p>
