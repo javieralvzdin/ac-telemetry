@@ -54,6 +54,12 @@
     transform 0.2s ease;
 }
 
+.site-header__flag {
+  width: 22px;
+  height: 22px;
+  display: block;
+}
+
 .site-header__lang-btn:hover {
   opacity: 0.85;
 }
