@@ -2,6 +2,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useRef } from 'react';
 import ScrollExpand from '../../components/effects/ScrollExpand.jsx';
 import WarpImage from '../../components/effects/WarpImage.jsx';
+import PhotoCarousel from '../../components/effects/PhotoCarousel.jsx';
 import Sidebar from '../Docs/Sidebar.jsx';
 import SearchBox from '../Docs/SearchBox.jsx';
 import { flattenNav } from '../../data/nav.js';
@@ -85,6 +86,8 @@ export default function Home() {
           <ActivePage />
         </article>
       </section>
+
+      <PhotoCarousel />
     </div>
   );
 }
